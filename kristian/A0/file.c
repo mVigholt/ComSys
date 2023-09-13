@@ -3,7 +3,7 @@
 #include <string.h> // strerror.
 #include <errno.h>  // errno.
 #include <strings.h> //string type
-#define BUFFER_SIZE  26
+#define BUFFER_SIZE  27
 
 
 int print_hello_world(void) {
@@ -50,8 +50,7 @@ int main(int argc, char* argv[argc+1]) {
 
   char* file_path = argv[1];
   size_t num;
-  char buffer[BUFFER_SIZE + 1];
-  buffer[BUFFER_SIZE] = '\0';
+  
 
   FILE *f = fopen(file_path, "r");
 
@@ -60,8 +59,14 @@ int main(int argc, char* argv[argc+1]) {
     print_error(file_path, errno);
     return EXIT_SUCCESS;
   }
-  
-  num = fread(buffer, sizeof( char ), 100, f);
+
+  // get size of file 
+  fseek(f, 0, SEEK_END);
+  size_t buffer_size = ftell(f);
+  char buffer[buffer_size + 1];
+  rewind(f); //reset filestream to beginning of file
+  //count number of read bytes
+  num = fread(buffer, sizeof( char ), buffer_size, f);
   fclose(f);
   
   if (!num) {
