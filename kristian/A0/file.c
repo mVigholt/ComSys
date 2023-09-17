@@ -6,6 +6,25 @@
 #define BUFFER_SIZE  27
 
 
+// Enums of file types for identifying the files
+enum {
+  DATA,
+  EMPTY,
+  ASCII,
+  ISO8859,
+  UTF8
+};
+
+// Strings of file types for printing to stdout
+const char* const FILE_TYPE_STRINGS[] = {
+  "data",
+  "empty",
+  "ASCII text",
+  "ISO-8859-1 text",
+  "UTF-8 text"
+};
+
+
 int print_hello_world(void) {
   return fprintf(stdout, "Hello, world!\n");
 }
@@ -42,8 +61,8 @@ size_t read_file(char* file_path) {
 
 int main(int argc, char* argv[argc+1]) {
 
-  // 2.2 return stderr if no input path
-  if (argc == 1) {
+  // 2.2 return stderr if no input path or too many arguments
+  if (argc == 1 || argc > 2) {
     fprintf(stderr, "Usage: file path");
     return EXIT_FAILURE;
   };
@@ -70,9 +89,10 @@ int main(int argc, char* argv[argc+1]) {
   fclose(f);
   
   if (!num) {
-    printf("empty");
+    printf("%s: %s", file_path, FILE_TYPE_STRINGS[1]);
   } else {
-    printf("%zu", num);
+    // DATA: TO BE CHANGED 
+    printf("%s: %zu", file_path, num);
   }
 
   return EXIT_SUCCESS;
