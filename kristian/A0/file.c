@@ -24,38 +24,10 @@ const char* const FILE_TYPE_STRINGS[] = {
   "UTF-8 text"
 };
 
-
-int print_hello_world(void) {
-  return fprintf(stdout, "Hello, world!\n");
-}
-
-
 // Assumes: errnum is a valid error number
 int print_error(char *path, int errnum) {
   return fprintf(stdout, "%s: cannot determine (%s)\n",
     path, strerror(errnum));
-}
-
-
-// opens file for reading and returns count of characters read
-// see: https://www.ibm.com/docs/en/zos/2.1.0?topic=functions-fread-read-items
-size_t read_file(char* file_path) {
-  size_t count;
-  char buffer[BUFFER_SIZE + 1];
-  buffer[BUFFER_SIZE] = '\0';
-
-  FILE *f = fopen(file_path, "r");
-
-  // 2.3 error if filepath or name doesnt exist
-  if (!f) {
-    print_error(file_path, errno);
-    return EXIT_FAILURE;
-  } 
-  
-  count = fread(buffer, sizeof( char ), 100, f);
-  fclose(f);
-
-  return count;
 }
 
 
@@ -85,14 +57,37 @@ int main(int argc, char* argv[argc+1]) {
   char buffer[buffer_size + 1];
   rewind(f); //reset filestream to beginning of file
   //count number of read bytes
+  //all chars are stored in the buffer array
   num = fread(buffer, sizeof( char ), buffer_size, f);
   fclose(f);
   
   if (!num) {
+    //empty file
     fprintf(stdout, "%s: %s\n", file_path, FILE_TYPE_STRINGS[1]);
   } else {
-    // DATA: TO BE CHANGED 
-    printf("%s: %zu\n", file_path, num);
+    // DATA/ASCII
+    // convert char to hex or binary and check if it exists in the union set of ASCII, if it does continue looping through buffer array
+    // if it doesnt, break loop and return data identification
+    size_t ascii = 0;
+
+    for (size_t i = 0; i < buffer_size; i++) {
+      unsigned decimal = buffer[i];
+      //fprintf(stdout, "%u\n", decimal);
+      if ((decimal > 6 && decimal < 15) || decimal == 28 || (decimal >= 32 && decimal < 128)) {
+        ascii = 1;
+      } else {
+        ascii = 0;
+        break;
+      };
+    }
+
+    if (ascii) {
+      // ascii type
+      fprintf(stdout, "%s: %s\n", file_path, FILE_TYPE_STRINGS[2]);
+    } else {
+      // data type
+      fprintf(stdout, "%s: %s\n", file_path, FILE_TYPE_STRINGS[0]);
+    }
   }
 
   return EXIT_SUCCESS;
