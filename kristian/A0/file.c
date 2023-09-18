@@ -63,7 +63,7 @@ int main(int argc, char* argv[argc+1]) {
 
   // 2.2 return stderr if no input path or too many arguments
   if (argc == 1 || argc > 2) {
-    fprintf(stderr, "Usage: file path");
+    fprintf(stderr, "Usage: file path\n");
     return EXIT_FAILURE;
   };
 
@@ -89,10 +89,10 @@ int main(int argc, char* argv[argc+1]) {
   fclose(f);
   
   if (!num) {
-    printf("%s: %s", file_path, FILE_TYPE_STRINGS[1]);
+    fprintf(stdout, "%s: %s\n", file_path, FILE_TYPE_STRINGS[1]);
   } else {
     // DATA: TO BE CHANGED 
-    printf("%s: %zu", file_path, num);
+    printf("%s: %zu\n", file_path, num);
   }
 
   return EXIT_SUCCESS;
