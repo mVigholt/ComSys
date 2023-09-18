@@ -60,35 +60,30 @@ int main(int argc, char* argv[argc+1]) {
   //all chars are stored in the buffer array
   num = fread(buffer, sizeof( char ), buffer_size, f);
   fclose(f);
-  
+
+  unsigned type = 0;
+
   if (!num) {
     //empty file
-    fprintf(stdout, "%s: %s\n", file_path, FILE_TYPE_STRINGS[1]);
+    type = 1;
   } else {
     // DATA/ASCII
     // convert char to hex or binary and check if it exists in the union set of ASCII, if it does continue looping through buffer array
     // if it doesnt, break loop and return data identification
-    size_t ascii = 0;
-
     for (size_t i = 0; i < buffer_size; i++) {
       unsigned decimal = buffer[i];
       //fprintf(stdout, "%u\n", decimal);
       if ((decimal > 6 && decimal < 15) || decimal == 28 || (decimal >= 32 && decimal < 128)) {
-        ascii = 1;
+        type = 2;
       } else {
-        ascii = 0;
+        type = 0;
         break;
       };
     }
-
-    if (ascii) {
-      // ascii type
-      fprintf(stdout, "%s: %s\n", file_path, FILE_TYPE_STRINGS[2]);
-    } else {
-      // data type
-      fprintf(stdout, "%s: %s\n", file_path, FILE_TYPE_STRINGS[0]);
-    }
   }
+
+  //types: 0=data, 1=empty, 2=ascii
+  fprintf(stdout, "%s: %s\n", file_path, FILE_TYPE_STRINGS[type]);
 
   return EXIT_SUCCESS;
 }
