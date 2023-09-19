@@ -117,16 +117,16 @@ int main(int argc, char* argv[argc+1]) {
           }
         }
       }
-
-      if (isAsci) {
-        type = 2;
-      } else if (isIso) {
-        type = 3;
-      } else if (isUtf AND (k = 0)) {
-        type = 4;
-      } else {
-        type = 0;
-      }
+    }
+    
+    if (isAsci) {
+      type = 2;
+    } else if (isIso) {
+      type = 3;
+    } else if (isUtf AND (k = 0)) {
+      type = 4;
+    } else {
+      type = 0;
     }
   }
 
