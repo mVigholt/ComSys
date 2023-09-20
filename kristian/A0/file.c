@@ -26,10 +26,9 @@ const char* const FILE_TYPE_STRINGS[] = {
 
 // Assumes: errnum is a valid error number
 int print_error(char *path, int errnum) {
-  return fprintf(stdout, "%s: cannot determine (%s)\n",
+  return fprintf(stdout, "%s: cannot open: %s\n",
     path, strerror(errnum));
 }
-
 
 int main(int argc, char* argv[argc+1]) {
 
