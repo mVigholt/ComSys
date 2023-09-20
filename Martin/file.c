@@ -3,6 +3,7 @@
 #include <string.h> // strerror.
 #include <errno.h>  // errno.
 #include <strings.h> //string type
+#include <stdbool.h> // bool
 #define BUFFER_SIZE  27
 
 
@@ -30,9 +31,7 @@ int print_error(char *path, int errnum) {
     path, strerror(errnum));
 }
 
-int next_carracter
-
-int main(int argc, char* argv[argc+1]) {
+int main(int argc, char* argv[]) {//argc+1]) {
 
   // 2.2 return stderr if no input path or too many arguments
   if (argc == 1 || argc > 2) {
@@ -64,12 +63,12 @@ int main(int argc, char* argv[argc+1]) {
 
   unsigned type = 0;
 
-  bool isUtf =true;
+  bool isUtf = true;
   bool isIso = true;
   bool isAsci = true;
 
-  unsigned char n = 0;  //For the last read byte
-  unsigned char k = 0;  //How many extra bytes are expected in the current UTF sequence
+  unsigned n = 0;  //For the last read byte
+  unsigned k = 0;  //How many extra bytes are expected in the current UTF sequence
 
   if (!num) {
     //empty file
@@ -81,12 +80,12 @@ int main(int argc, char* argv[argc+1]) {
     for (size_t i = 0; i < buffer_size; i++) {
       n = buffer[i];
       
-      if NOT(((n >= 7) AND (n <= 13)) OR (n == 27) OR ((n >= 32) AND (n <= 126))) {
+      if (!(((n >= 7) && (n <= 13)) || (n == 27) || ((n >= 32) && (n <= 126)))) {
         if (isAsci) {
           isAsci = false;
         }
         
-        if (isIso AND NOT((n >= 160) AND (n <= 255))) {
+        if (isIso && !((n >= 160) && (n <= 255))) {
           isIso = false;
         }
       }
@@ -97,20 +96,20 @@ int main(int argc, char* argv[argc+1]) {
         } 
         
         if (k == 0) {
-          if ((n >= 128) AND (n <= 191)) {
+          if ((n >= 128) && (n <= 191)) {
             isUtf = false;
           }
-          if ((n >= 192) AND (n <= 223)) {
+          if ((n >= 192) && (n <= 223)) {
             k = 1;
           }
-          if ((n >= 224) AND (n <= 239)) {
+          if ((n >= 224) && (n <= 239)) {
             k = 2;
           }
-          if ((n >= 240) AND (n <= 247)) {
+          if ((n >= 240) && (n <= 247)) {
             k = 3;
           }
         } else {
-          if ((n >= 128) AND (n <= 191)) {
+          if ((n >= 128) && (n <= 191)) {
             k = k - 1;
           } else {
             isUtf = false;
@@ -123,7 +122,7 @@ int main(int argc, char* argv[argc+1]) {
       type = 2;
     } else if (isIso) {
       type = 3;
-    } else if (isUtf AND (k = 0)) {
+    } else if (isUtf && (k = 0)) {
       type = 4;
     } else {
       type = 0;
