@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {//argc+1]) {
           isAsci = false;
         }
         
-        if (isIso && ((n >= 128) && (n <= 159))){
+        if (isIso && (!(n >= 160))){// && (n <= 159))){
           isIso = false;
         }
       }
