@@ -30,7 +30,6 @@ int print_error(char *path, int errnum) {
     path, strerror(errnum));
 }
 
-
 int main(int argc, char* argv[argc+1]) {
 
   // 2.2 return stderr if no input path or too many arguments
