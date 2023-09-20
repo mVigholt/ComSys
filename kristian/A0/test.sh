@@ -17,7 +17,12 @@ printf "Hello, World!" > test_files/ascii2.input
 printf "Hello,\x00World!\n" > test_files/data.input
 printf "" > test_files/empty.input
 ### TODO: Generate more test files ###
-
+printf "Hemmelighed" > test_files/hemmelig_fil.input
+chmod -r test_files/hemmelig_fil.input
+# ISO file with ® symbol (decimal 174)
+printf "Hello,\xAEWorld!\n" > test_files/iso-8859-1.input
+# UTF-8 file with の symbol (decimal 	227 129 174)
+# printf "Hello,U+306EWorld!\n" > test_files/utf-8.input
 
 echo "Running the tests.."
 exitcode=0
