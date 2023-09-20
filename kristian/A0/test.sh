@@ -21,8 +21,8 @@ printf "Hemmelighed" > test_files/hemmelig_fil.input
 chmod -r test_files/hemmelig_fil.input
 # ISO file with ® symbol (decimal 174)
 printf "Hello,\xAEWorld!\n" > test_files/iso-8859-1.input
-# UTF-8 file with の symbol (decimal 	227 129 174)
-# printf "Hello,U+306EWorld!\n" > test_files/utf-8.input
+# UTF-8 file with の symbol (U+306E / decimal 227 129 174 / e3 81 ae)
+printf "Hello,\xE3\x81\xAEWorld!\n" > test_files/utf-8.input
 
 echo "Running the tests.."
 exitcode=0
