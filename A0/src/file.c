@@ -50,14 +50,14 @@ int main(int argc, char* argv[argc+1]) {
     return EXIT_SUCCESS;
   }
 
-  // get size of file 
+  //load file to streamreader
+  //all chars are stored in the buffer array
+  //see ref: https://www.ibm.com/docs/en/zos/2.1.0?topic=functions-fread-read-items
   fseek(f, 0, SEEK_END);
   size_t buffer_size = ftell(f);
   char buffer[buffer_size + 1];
   rewind(f); //reset filestream to beginning of file
-  //count number of read bytes
-  //all chars are stored in the buffer array
-  num = fread(buffer, sizeof( char ), buffer_size, f);
+  num = fread(buffer, sizeof( char ), buffer_size, f); //count number of read bytes
   fclose(f);
 
   unsigned type = EMPTY;
@@ -70,12 +70,9 @@ int main(int argc, char* argv[argc+1]) {
   unsigned char k = 0;  //How many extra bytes are expected in the current UTF sequence
 
   if (!num) {
-    //empty file
     type = EMPTY;
   } else {
-    // DATA/ASCII
-    // convert char to hex or binary and check if it exists in the union set of ASCII, if it does continue looping through buffer array
-    // if it doesnt, break loop and return data identification
+    // DATA/ASCII/ISO/UTF8
     for (size_t i = 0; i < buffer_size; i++) {
       n = buffer[i];
 
@@ -83,7 +80,7 @@ int main(int argc, char* argv[argc+1]) {
         if (isAsci) {
           isAsci = false;
         }
-        
+
         if (isIso && (!(n >= 160))){
           isIso = false;
         }
@@ -128,7 +125,6 @@ int main(int argc, char* argv[argc+1]) {
     }
   }
 
-  //types: 0=data, 1=empty, 2=ascii
   fprintf(stdout, "%s: %s\n", file_path, FILE_TYPE_STRINGS[type]);
 
   return EXIT_SUCCESS;
