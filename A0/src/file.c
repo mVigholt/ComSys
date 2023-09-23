@@ -62,10 +62,6 @@ int main(int argc, char* argv[argc+1]) {
 
   unsigned type = EMPTY;
 
-  bool isUtf = true;
-  bool isIso = true;
-  bool isAsci = true;
-
   unsigned char n = 0;  //For the last read byte
   unsigned char k = 0;  //How many extra bytes are expected in the current UTF sequence
 
@@ -73,6 +69,10 @@ int main(int argc, char* argv[argc+1]) {
     type = EMPTY;
   } else {
     // DATA/ASCII/ISO/UTF8
+    bool isAsci = true;
+    bool isUtf = true;
+    bool isIso = true;
+    
     for (size_t i = 0; i < buffer_size; i++) {
       n = buffer[i];
 
@@ -116,10 +116,10 @@ int main(int argc, char* argv[argc+1]) {
 
     if (isAsci) {
       type = ASCII;
-    } else if (isIso) {
-      type = ISO8859;
     } else if (isUtf && (k == 0)) {
       type = UTF8;
+    } else if (isIso) {
+      type = ISO8859;
     } else {
       type = DATA;
     }

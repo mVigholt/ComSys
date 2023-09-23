@@ -20,8 +20,8 @@ const char* const FILE_TYPE_STRINGS[] = {
   "data",
   "empty",
   "ASCII text",
-  "ISO-8859-1 text",
-  "UTF-8 text"
+  "ISO-8859 text",
+  "Unicode text, UTF-8 text"
 };
 
 // Assumes: errnum is a valid error number
@@ -30,7 +30,7 @@ int print_error(char *path, int errnum) {
     path, strerror(errnum));
 }
 
-int main(int argc, char* argv[]) {//argc+1]) {
+int main(int argc, char* argv[argc+1]) {
 
   // 2.2 return stderr if no input path or too many arguments
   if (!(argc == 2)) {
@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {//argc+1]) {
   num = fread(buffer, sizeof( char ), buffer_size, f);
   fclose(f);
 
-  unsigned type = 0;
+  unsigned type = EMPTY;
 
   bool isUtf = true;
   bool isIso = true;
@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {//argc+1]) {
 
   if (!num) {
     //empty file
-    type = 1;
+    type = EMPTY;
   } else {
     // DATA/ASCII
     // convert char to hex or binary and check if it exists in the union set of ASCII, if it does continue looping through buffer array
@@ -79,20 +79,18 @@ int main(int argc, char* argv[]) {//argc+1]) {
     for (size_t i = 0; i < buffer_size; i++) {
       n = buffer[i];
 
-      //fprintf(stdout, "%u\n", n);
-
       if (!(((n >= 7) && (n <= 13)) || (n == 27) || ((n >= 32) && (n <= 126)))) {
         if (isAsci) {
           isAsci = false;
         }
         
-        if (isIso && (!(n >= 160))){// && (n <= 159))){
+        if (isIso && (!(n >= 160))){
           isIso = false;
         }
       }
 
       if (isUtf) {
-        if (n > 247) {
+        if ((n < 7) || (n > 247)) {
           isUtf = false;  
         } 
         
@@ -118,25 +116,15 @@ int main(int argc, char* argv[]) {//argc+1]) {
         }
       }
     }
-    
-    // if (isAsci) {
-    //   fprintf(stdout, "isAsci\n");
-    // } 
-    // if (isIso) {
-    //   fprintf(stdout, "isIso\n");
-    // } 
-    // if (isUtf && (k == 0)) {
-    //   fprintf(stdout, "isUtf\n");
-    // }
 
     if (isAsci) {
-      type = 2;
+      type = ASCII;
     } else if (isIso) {
-      type = 3;
+      type = ISO8859;
     } else if (isUtf && (k == 0)) {
-      type = 4;
+      type = UTF8;
     } else {
-      type = 0;
+      type = DATA;
     }
   }
 
