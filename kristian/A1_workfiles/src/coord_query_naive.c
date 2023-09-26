@@ -49,11 +49,12 @@ const struct record* lookup_naive(struct naive_data *data, double lon, double la
     struct record record = data->rs[i];
     double r_lon = record.lon;
     double r_lat = record.lat;
+
     // calc eucl dist to point
     double dist = eucl_dist(r_lon, r_lat, lon, lat);
     
     if (!i) {
-      // first record
+      // first record [0], init variables
       eucl_dist_to_point = dist;
       candidate = record;
     } else if (dist < eucl_dist_to_point) { //saving smallest distance
