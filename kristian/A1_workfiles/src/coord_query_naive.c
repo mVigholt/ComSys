@@ -17,20 +17,15 @@ struct naive_data {
 };
 
 struct naive_data* mk_naive(struct record* rs, int n) {
-  //assert(0);
-  // TODO
-  int record_size = sizeof(struct record);
-  int arr_size = n;
-  struct naive_data *data_out = malloc(arr_size * record_size);
+  struct naive_data *data_out = malloc(sizeof(struct naive_data));
   data_out->rs = rs;
   data_out->n = n;
   return data_out;
 }
 
 void free_naive(struct naive_data* data) {
-  //assert(0);
-  // TODO
   free(data->rs);
+  free(data);
 }
 
 double eucl_dist(double lon, double lat, double x, double y) {
@@ -39,11 +34,9 @@ double eucl_dist(double lon, double lat, double x, double y) {
 }
 
 const struct record* lookup_naive(struct naive_data *data, double lon, double lat) {
-  //assert(0);
-  // TODO
   int size = data->n;
   double eucl_dist_to_point;
-  struct record candidate; //pointer to record
+  int candidate_index; 
 
   for (int i = 0; i < size; i++) {
     struct record record = data->rs[i];
@@ -56,15 +49,15 @@ const struct record* lookup_naive(struct naive_data *data, double lon, double la
     if (!i) {
       // first record [0], init variables
       eucl_dist_to_point = dist;
-      candidate = record;
+      candidate_index = i;
     } else if (dist < eucl_dist_to_point) { //saving smallest distance
-      // save to candidate and eucl_dist_to_point
+      // save to candidate_index and eucl_dist_to_point
       eucl_dist_to_point = dist;
-      candidate = record;
+      candidate_index = i;
     }
     // else go to next
   }
-  return &candidate;
+  return &data->rs[candidate_index]; //pointer address to the found record
 }
 
 int main(int argc, char** argv) {
