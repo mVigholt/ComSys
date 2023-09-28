@@ -15,23 +15,17 @@ struct naive_data {
 };
 
 struct naive_data* mk_naive(struct record* rs, int n) {
-  // TODO
-  struct naive_data *data_out = malloc(sizeof(data_out));
+  struct naive_data* data_out = malloc(sizeof(struct naive_data));
   data_out->rs = rs;
   data_out->n = n;
   return data_out;
-  //assert(0);
-
 }
 
 void free_naive(struct naive_data* data) {
-  // TODO
-  free(data->rs);
-  //assert(0);
+  free(data);
 }
 
-const struct record* lookup_naive(struct naive_data *data, int64_t needle) {
-  // TODO
+const struct record* lookup_naive(struct naive_data* data, int64_t needle) {
   int size = data->n;
   for (int i = 0; i < size; i++) {
     int64_t id = data->rs[i].osm_id;
@@ -39,13 +33,12 @@ const struct record* lookup_naive(struct naive_data *data, int64_t needle) {
       return &data->rs[i];
     }
   }
-  //assert(0);
   return NULL;
 }
 
 int main(int argc, char** argv) {
   return id_query_loop(argc, argv,
-                    (mk_index_fn)mk_naive,
-                    (free_index_fn)free_naive,
-                    (lookup_fn)lookup_naive);
+                      (mk_index_fn)mk_naive,
+                      (free_index_fn)free_naive,
+                      (lookup_fn)lookup_naive);
 }
