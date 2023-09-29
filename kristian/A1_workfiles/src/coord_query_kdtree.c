@@ -25,7 +25,7 @@ struct point {
 struct node {
   //int isNull; // 0 = FALSE; 1 = TRUE
   struct point point;
-  int axis; // 0 (FALSE) = longitude, 1 (TRUE) = latitude. The x-axis or the y-axis aka. the lon value or lat value.
+  int axis; // 0 (FALSE) = longitude (x), 1 (TRUE) = latitude (y). The x-axis or the y-axis aka. the lon value or lat value.
   struct node* left;
   struct node* right;
   const struct record* record;
