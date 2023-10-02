@@ -51,6 +51,7 @@ double axis_diff(struct node* node, struct query query) {
 int compare_double(void* axis, const void* a, const void* b) {
   printf("compare_double\n");
   double x = *((int*) axis) ? ((struct node*)a)->record->lat : ((struct node*)a)->record->lon;
+  printf("compare_double\n");
   double y = *((int*) axis) ? ((struct node*)b)->record->lat : ((struct node*)b)->record->lon;
   if (x < y) {
     return -1;
@@ -61,21 +62,26 @@ int compare_double(void* axis, const void* a, const void* b) {
   }
 }
 
+// take median of sorted array (by points by axis) and the median instead of a random array 
 // select median by axis from points
 // e.g if axis is 1, then look at latitude coordinates. Select the median latitude among a randomly selected set of coordinates. 
 // points = array of original records
 struct record* find_median(struct nodes* nodes, int* axis_ptr) {
   printf("find_median\n");
+
+  if (nodes->n == 1) {
+    return (void*) 0;
+  }
+
   srand(time(0));
-  int random_size = nodes->n;
-  int median = (random_size / 2) - 1;
-  int n = nodes->n;
-  struct node* arr = malloc(sizeof(struct node) * random_size);
-  for (int i = 0; i < random_size; i++) {
-    arr[i].record = nodes->n_index[rand()%n].record;
+  int size = nodes->n;
+  int median = (size / 2);
+  struct node* arr = malloc(sizeof(struct node) * size);
+  for (int i = 0; i < size; i++) {
+    arr[i].record = nodes->n_index[rand()%size].record;
   }
   
-  qsort_r(arr, random_size, sizeof(struct node), axis_ptr, compare_double);
+  qsort_r(arr, size, sizeof(struct node), axis_ptr, compare_double);
 
   struct record* out = arr[median].record;
   free(arr);
@@ -86,6 +92,8 @@ struct record* find_median(struct nodes* nodes, int* axis_ptr) {
 struct nodes* points_before_median(struct nodes* nodes, struct node* median) {
   printf("points_before_median\n");
   if (!nodes->n_index) {
+    // CHECK RETURN TYPE HERE!? CHeck all void return type values throught the tree.
+    printf("void");
     return (void*) 0;
   }
 
@@ -108,9 +116,13 @@ struct nodes* points_before_median(struct nodes* nodes, struct node* median) {
   }
 
   struct nodes* nodes_out = malloc(sizeof(struct nodes));
-  nodes->n_index = arr;
-  nodes->n = count;
-
+  nodes_out->n_index = arr;
+  nodes_out->n = count;
+  // for (int i = 0; i < nodes_out->n; i++) {
+  //   printf("ID: %lli\n", nodes_out->n_index[i].record->osm_id);
+  // };
+  printf("ID: %p\n", nodes_out->n_index);
+  printf("pbm: count = %i\n", nodes_out->n);
   return nodes_out;
 }
 
