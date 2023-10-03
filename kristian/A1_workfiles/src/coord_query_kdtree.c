@@ -46,20 +46,25 @@ double axis_diff(struct node* node, struct query query) {
   return node_axis - query_axis;
 }
 
-// Compares longitude values. Used in qsort() in find_median()
+// Compares point values by axis. Used in qsort() in find_median()
 // ref: https://en.wikipedia.org/wiki/Qsort
 int compare_double(void* axis, const void* a, const void* b) {
   printf("compare_double\n");
   double x = *((int*) axis) ? ((struct node*)a)->record->lat : ((struct node*)a)->record->lon;
-  printf("compare_double\n");
   double y = *((int*) axis) ? ((struct node*)b)->record->lat : ((struct node*)b)->record->lon;
-  if (x < y) {
-    return -1;
-  } else if (x > y) {
-    return 1;
-  } else {
-    return 0;
-  }
+
+  if (x < y) return -1;
+  else if (x > y) return 1;
+  else return 0;
+}
+
+// Sorting nodes by axis.
+struct node* sort_nodes_by_axis(struct nodes* nodes, int* axis_ptr) {
+  printf("sort_nodes_by_axis\n");
+  int n = nodes->n;
+  assert(n > 1);
+  qsort_r(nodes->n_index, n, sizeof(struct node), axis_ptr, compare_double);
+  return nodes->n_index;
 }
 
 // take median of sorted array (by points by axis) and the median instead of a random array 
@@ -68,34 +73,20 @@ int compare_double(void* axis, const void* a, const void* b) {
 // points = array of original records
 struct record* find_median(struct nodes* nodes, int* axis_ptr) {
   printf("find_median\n");
+  if (!nodes->n) return (void*) 0;
+  if (nodes->n == 1) return nodes->n_index[0].record;
 
-  if (nodes->n == 1) {
-    return (void*) 0;
-  }
-
-  srand(time(0));
   int size = nodes->n;
-  int median = (size / 2);
-  struct node* arr = malloc(sizeof(struct node) * size);
-  for (int i = 0; i < size; i++) {
-    arr[i].record = nodes->n_index[rand()%size].record;
-  }
-  
-  qsort_r(arr, size, sizeof(struct node), axis_ptr, compare_double);
+  int median = (size - (size / 2) - 1);
+  nodes->n_index = sort_nodes_by_axis(nodes, axis_ptr);
 
-  struct record* out = arr[median].record;
-  free(arr);
-  return out;
+  return nodes->n_index[median].record;
 }
 
 // return array* of nodes before median point
 struct nodes* points_before_median(struct nodes* nodes, struct node* median) {
   printf("points_before_median\n");
-  if (!nodes->n_index) {
-    // CHECK RETURN TYPE HERE!? CHeck all void return type values throught the tree.
-    printf("void");
-    return (void*) 0;
-  }
+  if (!nodes->n) return (void*) 0;
 
   int axis = median->axis;
   double median_point = axis ? median->record->lat : median->record->lon;
@@ -118,33 +109,72 @@ struct nodes* points_before_median(struct nodes* nodes, struct node* median) {
   struct nodes* nodes_out = malloc(sizeof(struct nodes));
   nodes_out->n_index = arr;
   nodes_out->n = count;
-  // for (int i = 0; i < nodes_out->n; i++) {
-  //   printf("ID: %lli\n", nodes_out->n_index[i].record->osm_id);
-  // };
-  printf("ID: %p\n", nodes_out->n_index);
-  printf("pbm: count = %i\n", nodes_out->n);
+
+  for (int i = 0; i < nodes_out->n; i++) {
+    printf("%p\n", nodes_out->n_index[i].record);
+  }
+
   return nodes_out;
 }
 
 // return array* of records after median point
-struct record* points_after_median(struct record* rs, struct node* median) {
-  assert(0);
+struct nodes* points_after_median(struct nodes* nodes, struct node* median) {
+  printf("points_after_median\n");
+  assert(nodes->n);
+  if (!nodes->n) return (void*) 0;
+
+  int axis = median->axis;
+  double median_point = axis ? median->record->lat : median->record->lon;
+  int count = 0;
+  int capacity = 100;
+  int n = nodes->n;
+  struct node* arr_a = malloc(sizeof(struct node) * capacity);
+  for (int i = 0; i < n; i++) {
+    printf("nodes.n_index: %p\n", nodes->n_index[i].record);
+    double rs_point = axis ? nodes->n_index[i].record->lat : nodes->n_index[i].record->lon;
+    if (count == capacity) {
+      capacity *= 2;
+      arr_a = realloc(arr_a, sizeof(struct node) * capacity);
+    }
+    if (rs_point > median_point) {
+      count++;
+      printf("%p\n", arr_a[i].record);
+      arr_a[i].record = nodes->n_index[i].record;
+      printf("%p\n", nodes->n_index[i].record);
+      printf("%p\n", arr_a[i].record);
+      printf("%p\n", arr_a[i]);
+    }
+  }
+  for (int i = 0; i < count; i++) {
+    printf("%p\n", arr_a[i].record);
+  }
+
+  //assert(arr);
+  struct nodes* nodes_out = malloc(sizeof(struct nodes));
+  nodes_out->n_index = arr_a;
+  nodes_out->n = count;
+  //printf("%p\n", nodes_out->n_index);
+  // for (int i = 0; i < nodes_out->n; i++) {
+  //   printf("%p\n", nodes_out->n_index[i].record);
+  // }
+  // for (int i = 0; i < nodes_out->n; i++) {
+  //   printf("%p\n", arr[i].record);
+  // }
+  return nodes_out;
 }
 
 // take the array of records and the starting depth (0) as input
 struct node* kdtree(struct nodes* nodes, int depth) {
   printf("kdtree\n");
-  if (!nodes) {
-    return (void*) 0;
-  }
+  if (!nodes) return (void*) 0;
   
   int axis = depth % DIMENSIONS; // return 1 or 0
   struct node* new_node = malloc(sizeof(struct node));
   new_node->axis = axis;
   new_node->record = find_median(nodes, &axis); // select median by axis from points
   
-  new_node->left = kdtree(points_before_median(nodes, new_node), depth + 1);
-  //new_node->right = kdtree(points_after_median(rs, new_node), depth + 1, n);
+  //new_node->left = kdtree(points_before_median(nodes, new_node), depth + 1);
+  new_node->right = kdtree(points_after_median(nodes, new_node), depth + 1);
   
   return new_node;
 }
