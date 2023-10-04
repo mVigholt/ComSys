@@ -13,7 +13,6 @@
 struct query {
   double lon;
   double lat;
-  int axis; // 0 = longitude, 1 = latitude
 };
 
 struct node {
@@ -33,23 +32,11 @@ struct kdtree_data {
   int n;
 };
 
-// radius
-double eucl_dist(double lon, double lat, double x, double y) {
-  double sum = pow((x - lon), 2) + pow((y - lat), 2);
-  return sqrt(sum);
-}
-
-// difference in axis
-double axis_diff(struct node* node, struct query query) {
-  double node_axis = node->axis ? node->record->lat : node->record->lon;
-  double query_axis = query.axis ? query.lat : query.lon;
-  return node_axis - query_axis;
-}
 
 // Compares point values by axis. Used in qsort() in find_median()
 // ref: https://en.wikipedia.org/wiki/Qsort
 int compare_double(void* axis, const void* a, const void* b) {
-  printf("compare_double\n");
+  //printf("compare_double\n");
   double x = *((int*) axis) ? ((struct node*)a)->record->lat : ((struct node*)a)->record->lon;
   double y = *((int*) axis) ? ((struct node*)b)->record->lat : ((struct node*)b)->record->lon;
 
@@ -60,7 +47,7 @@ int compare_double(void* axis, const void* a, const void* b) {
 
 // Sorting nodes by axis.
 struct node* sort_nodes_by_axis(struct nodes* nodes, int* axis_ptr) {
-  printf("sort_nodes_by_axis\n");
+  //printf("sort_nodes_by_axis\n");
   int n = nodes->n;
   assert(n > 1);
   qsort_r(nodes->n_index, n, sizeof(struct node), axis_ptr, compare_double);
@@ -72,7 +59,7 @@ struct node* sort_nodes_by_axis(struct nodes* nodes, int* axis_ptr) {
 // e.g if axis is 1, then look at latitude coordinates. Select the median latitude among a randomly selected set of coordinates. 
 // points = array of original records
 struct record* find_median(struct nodes* nodes, int* axis_ptr) {
-  printf("find_median\n");
+  //printf("find_median\n");
   if (!nodes->n) return (void*) 0;
   if (nodes->n == 1) return nodes->n_index[0].record;
 
@@ -85,9 +72,9 @@ struct record* find_median(struct nodes* nodes, int* axis_ptr) {
 
 // return array* of nodes before median point
 struct nodes* points_before_median(struct nodes* nodes, struct node* median) {
-  printf("points_before_median\n");
+  //printf("points_before_median\n");
   if (!nodes->n) return (void*) 0;
-
+  
   int axis = median->axis;
   double median_point = axis ? median->record->lat : median->record->lon;
   int64_t count = 0;
@@ -108,19 +95,15 @@ struct nodes* points_before_median(struct nodes* nodes, struct node* median) {
   }
 
   struct nodes* nodes_out = malloc(sizeof(struct nodes));
-  nodes_out->n_index = arr;
+  nodes_out->n_index = arr ? arr : (void*) 0;
   nodes_out->n = count;
-
-  // for (int i = 0; i < nodes_out->n; i++) {
-  //   printf("%p\n", arr[i].record);
-  // }
 
   return nodes_out;
 }
 
 // return array* of records after median point
 struct nodes* points_after_median(struct nodes* nodes, struct node* median) {
-  printf("points_after_median\n");
+  //printf("points_after_median\n");
   if (!nodes->n) return (void*) 0;
 
   int axis = median->axis;
@@ -131,7 +114,6 @@ struct nodes* points_after_median(struct nodes* nodes, struct node* median) {
   struct node* arr_a = malloc(sizeof(struct node) * capacity);
   
   for (int i = 0; i < n; i++) {
-    //printf("nodes.n_index: %p\n", nodes->n_index[i].record);
     double rs_point = axis ? nodes->n_index[i].record->lat : nodes->n_index[i].record->lon;
     if (count == capacity) {
       capacity *= 2;
@@ -143,12 +125,8 @@ struct nodes* points_after_median(struct nodes* nodes, struct node* median) {
     }
   }
 
-  // for (int j = 0; j < count; j++) {
-  //   printf("%p\n", (void*)arr_a[j].record);
-  // }
-
   struct nodes* nodes_out = malloc(sizeof(struct nodes));
-  nodes_out->n_index = arr_a;
+  nodes_out->n_index = arr_a ? arr_a : (void*) 0;
   nodes_out->n = count;
 
   return nodes_out;
@@ -156,7 +134,7 @@ struct nodes* points_after_median(struct nodes* nodes, struct node* median) {
 
 // take the array of records and the starting depth (0) as input
 struct node* kdtree(struct nodes* nodes, int depth) {
-  printf("kdtree\n");
+  //printf("kdtree\n");
   if (!nodes) return (void*) 0;
   
   int axis = depth % DIMENSIONS; // return 1 or 0
@@ -171,7 +149,7 @@ struct node* kdtree(struct nodes* nodes, int depth) {
 }
 
 struct nodes* rs_to_nodes(struct record* rs, int n) {
-  printf("rs_to_nodes\n");
+  //printf("rs_to_nodes\n");
   struct node* node_arr = malloc(sizeof(struct node) * n);
   for (int i = 0; i < n; i++) {
     node_arr[i].record = &rs[i];
@@ -182,30 +160,53 @@ struct nodes* rs_to_nodes(struct record* rs, int n) {
   return nodes_out;
 }
 
-struct record* lookup(struct node closest_node, struct query query, struct node node) {
-  // if ((void*) 0) {
-  //   return;
-  // } else if (eucl_dist(node.point, query_point) < eucl_dist(closest_node.point, query_point)) {
-  //   // closest_node = node;
-  // }
-  // double diff = axis_diff(node, query);
-  // double radius = eucl_dist(node, closest_node);
-  // if (diff >= 0 || radius > abs(diff)) {
-  //   lookup(closest_node, query, node.left);
-  // }
-  // if (diff <= 0 || radius > abs(diff)) {
-  //   lookup(closest_node, query, node.right);
-  // }
-  assert(0);
+// difference in axis
+double axis_diff(struct node* node, struct query* query) {
+  double node_axis = node->axis ? node->record->lat : node->record->lon;
+  double query_axis = node->axis ? query->lat : query->lon;
+  return node_axis - query_axis;
 }
 
-struct kdtree_data* mk_kdtree(struct record* rs, int n) {
-  printf("mk_kdtree\n");
-  struct kdtree_data* data_out = malloc(sizeof(struct kdtree_data));
-  data_out->kdtree = kdtree(rs_to_nodes(rs, n), 0);
+// radius
+double eucl_dist(struct node* node, struct query* query) {
+  double x0 = query->lon;
+  double y0 = query->lat;
+  double x1 = node->record->lon;
+  double y1 = node->record->lat;
+  double sum = pow((x0 - x1), 2) + pow((y0 - y1), 2);
+  return sqrt(sum);
+}
+
+// recursive lookup
+struct record* lookup(struct node* closest, struct query* query, struct node* node) {
+  printf("lookup\n");
+  printf("node: %s\n", node->record->name);
+  printf("closest: %s\n", closest->record->name);
+  //printf("left: %s\n", node->left->record->name);
+  //printf("right: %s\n", node->right->record->name);
+  if (!node) {
+    return closest->record;
+  } else if (eucl_dist(node, query) < eucl_dist(closest, query)) {
+    closest->record = node->record;
+  }
+
+  double diff = axis_diff(node, query);
+  double radius = eucl_dist(closest, query);
+
+  if (diff >= 0 || radius > fabs(diff)) {
+    lookup(closest, query, node->left);
+  }
+  if (diff <= 0 || radius > fabs(diff)) {
+    lookup(closest, query, node->right);
+  }
+}
+
+struct nodes* mk_kdtree(struct record* rs, int n) {
+  //printf("mk_kdtree\n");
+  struct nodes* data_out = malloc(sizeof(struct kdtree_data));
+  data_out->n_index = kdtree(rs_to_nodes(rs, n), 0);
   data_out->n = n;
   return data_out;
-  //TO DO
 }
 
 void free_kdtree(struct kdtree_data* data) {
@@ -215,10 +216,16 @@ void free_kdtree(struct kdtree_data* data) {
   assert(0);
 }
 
-const struct record* lookup_kdtree(struct kdtree_data *data, double lon, double lat) {
+const struct record* lookup_kdtree(struct nodes* nodes, double lon, double lat) {
   printf("lookup_kdtree\n");
-  assert(0);
-  //TO DO
+
+  struct query* query = malloc(sizeof(struct query));
+  query->lon = lon;
+  query->lat = lat;
+  assert(query != NULL);
+
+  //assert(0);
+  return lookup(&nodes->n_index[0], query, &nodes->n_index[0]);
 }
 
 int main(int argc, char** argv) {
