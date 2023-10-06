@@ -27,12 +27,6 @@ struct nodes {
   int n;
 };
 
-struct kdtree_data {
-  struct node* kdtree;
-  int n;
-};
-
-
 // Compares point values by axis. Used in qsort() in find_median()
 // ref: https://en.wikipedia.org/wiki/Qsort
 int compare_double(void* axis, const void* a, const void* b) {
@@ -194,7 +188,7 @@ struct node* lookup(struct node* closest, struct query* query, struct node* node
   //assert(node);
 
   printf("loop\n");
-  if ((void*) node->left == 0 || (void*) node->right == 0) {
+  if (/* (void*) node->left == 0 || (void*) node->right == 0 */ (void*) node == 0) {
     printf("return\n");
     printf("closest_ptr: %p\n", closest);
     return closest;
@@ -222,27 +216,37 @@ struct node* lookup(struct node* closest, struct query* query, struct node* node
   printf("recursion\n");
   if (diff >= 0 || radius > fabs(diff)) {
     printf("lookup left\n");
-    return lookup(closest, query, node->left);
+    lookup(closest, query, node->left);
   }
   if (diff <= 0 || radius > fabs(diff)) {
     printf("lookup right\n");
-    return lookup(closest, query, node->right);
+    lookup(closest, query, node->right);
   }
+  return closest;
 }
 
 struct nodes* mk_kdtree(struct record* rs, int n) {
   //printf("mk_kdtree\n");
-  struct nodes* data_out = malloc(sizeof(struct kdtree_data));
+  struct nodes* data_out = malloc(sizeof(struct nodes));
   data_out->n_index = kdtree(rs_to_nodes(rs, n), 0);
   data_out->n = n;
+  
   return data_out;
 }
 
-void free_kdtree(struct kdtree_data* data) {
+void free_node_rec(struct node* node) {
+  if ((void*) node == 0) {
+    return;
+  }
+  free_node_rec(node->left);
+  free_node_rec(node->right);
+  free(node);
+}
+
+void free_kdtree(struct nodes* nodes) {
   printf("free_kdtree\n");
-  //free(data->kdtree);
-  //free(data);
-  assert(0);
+  free_node_rec(&nodes->n_index[0]);
+  free(nodes);
 }
 
 const struct record* lookup_kdtree(struct nodes* nodes, double lon, double lat) {
@@ -258,6 +262,8 @@ const struct record* lookup_kdtree(struct nodes* nodes, double lon, double lat) 
   closest = lookup(closest, query, &nodes->n_index[0]);
 
   printf("lookup_kdtree node_out: %p\n", closest);
+
+  free(query);
   return closest->record;
 }
 
