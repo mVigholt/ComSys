@@ -9,7 +9,6 @@ struct job_node {
 };
 
 struct job_queue {
-  int size;
   int capacity;
   struct job_node* head;
   struct job_node* tail;

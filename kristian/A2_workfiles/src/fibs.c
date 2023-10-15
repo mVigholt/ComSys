@@ -73,9 +73,6 @@ void* worker(void *arg) {
 int main(int argc, char * const *argv) {
   int num_threads = 1;
   
-  // DEBUG STATEMENT 
-  printf("number of threads: %i\n", num_threads);
-
   if (argc == 3 && strcmp(argv[1], "-n") == 0) {
     // Since atoi() simply returns zero on syntax errors, we cannot
     // distinguish between the user entering a zero, or some
@@ -89,6 +86,10 @@ int main(int argc, char * const *argv) {
       err(1, "invalid thread count: %s", argv[2]);
     }
   }
+
+  // DEBUG STATEMENT 
+  // for different threads input use './fibs -n [nthreads] < input.txt'
+  printf("number of threads: %i\n", num_threads);
 
 
   // Create job queue.
