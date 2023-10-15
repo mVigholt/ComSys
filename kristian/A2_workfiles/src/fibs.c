@@ -73,7 +73,7 @@ void* worker(void *arg) {
 int main(int argc, char * const *argv) {
   int num_threads = 1;
   
-  // DEBUG STATEMENT
+  // DEBUG STATEMENT 
   printf("number of threads: %i\n", num_threads);
 
   if (argc == 3 && strcmp(argv[1], "-n") == 0) {
@@ -113,7 +113,7 @@ int main(int argc, char * const *argv) {
   free(line);
 
   // Destroy the queue.
-  //job_queue_destroy(&jq);
+  job_queue_destroy(&jq);
 
   // Wait for all threads to finish.  This is important, at some may
   // still be working on their job.
