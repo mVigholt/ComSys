@@ -85,8 +85,8 @@ int job_queue_pop(struct job_queue *job_queue, void **data) {
   while (job_queue->size == 0) {
     //if queue is set to destroy return -1  
     if (destroy_queue == 1) {
-        printf("return -1\n");
-        return -1;
+      printf("return -1\n");
+      return -1;
     }
     pthread_cond_wait(&fill, &job_queue->head_lock);
   }
@@ -101,7 +101,9 @@ int job_queue_pop(struct job_queue *job_queue, void **data) {
   if (job_queue->size != 0) job_queue->size -= 1;
 
   // If job queue is empty and set to destroy, signal destroy
-  if (destroy_queue && job_queue->size == 0) pthread_cond_signal(&destroy);
+  if (destroy_queue && job_queue->size == 0) {
+    pthread_cond_signal(&destroy);
+  }
 
   free(tmp);
   assert(pthread_mutex_unlock(&job_queue->head_lock) == 0);
