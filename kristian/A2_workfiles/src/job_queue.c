@@ -37,6 +37,7 @@ int job_queue_destroy(struct job_queue *job_queue) {
 
   assert(pthread_mutex_lock(&destroy_lock) == 0);
   destroy_queue = 1;
+  pthread_cond_signal(&pop_cond);
   // Block request if queue is not empty.
   // Wait for it to be empty.
   while(size != 0) {
@@ -51,16 +52,19 @@ int job_queue_destroy(struct job_queue *job_queue) {
 int job_queue_push(struct job_queue *job_queue, void *data) {
   assert(job_queue != NULL);
 
+  assert(pthread_mutex_lock(&job_queue->tail_lock) == 0);
+  // Block requests when full, wait until availability in queue
+  while (size == job_queue->capacity) {
+    printf("push(): signal pop\n");
+    pthread_cond_signal(&pop_cond);
+    printf("push() wait\n");
+    pthread_cond_wait(&push_cond, &job_queue->tail_lock);
+  }
+
   // New node to push at end of queue
   struct job_node* new_node = malloc(sizeof(struct job_node));
   new_node->data = data;
   new_node->next = NULL;
-
-  assert(pthread_mutex_lock(&job_queue->tail_lock) == 0);
-  // Block requests when full, wait until availability in queue
-  while (size == job_queue->capacity) {
-    pthread_cond_wait(&push_cond, &job_queue->tail_lock);
-  }
 
   // Push new node to end of queue and apply new tail
   if (job_queue->head == NULL && job_queue->tail == NULL) {
@@ -72,7 +76,8 @@ int job_queue_push(struct job_queue *job_queue, void *data) {
   }
   // Increase size count
   if (size != job_queue->capacity) size++;
-  pthread_cond_signal(&pop_cond);
+  // printf("push: signal pop\n");
+  // pthread_cond_signal(&pop_cond);
   assert(pthread_mutex_unlock(&job_queue->tail_lock) == 0);
 
   printf("push(): job size = %i\n", size);
@@ -86,23 +91,29 @@ int job_queue_pop(struct job_queue *job_queue, void **data) {
   // Block request if queue is empty. 
   // Continue when there are elements in the queue.
   while (size == 0) {
-    //if queue is set to destroy return -1  
-    if (destroy_queue == 1) {
+    // if queue is set to destroy return -1  
+    if (destroy_queue) {
+      pthread_cond_signal(&pop_cond);
+      assert(pthread_mutex_unlock(&job_queue->head_lock) == 0);
       printf("return -1\n");
       return -1;
     }
+    printf("pop() wait\n");
     pthread_cond_wait(&pop_cond, &job_queue->head_lock);
   }
 
-  *(data) = job_queue->head->data;
+  *(data) = (void*) job_queue->head->data;
   struct job_node* tmp = job_queue->head;
   job_queue->head = job_queue->head->next;
   if (size != 0) size -= 1;
 
-    // If job queue is empty and set to destroy, signal destroy
+  // If job queue is empty and set to destroy, signal destroy
   if (destroy_queue && size == 0) {
     pthread_cond_signal(&destroy_cond);
-  } else if (size < job_queue->capacity / 2) {
+  }
+  
+  if (size == 0 && !destroy_queue) {
+    printf("pop(): signal push\n");
     pthread_cond_signal(&push_cond);
   }
 
