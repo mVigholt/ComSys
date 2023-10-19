@@ -87,11 +87,6 @@ int main(int argc, char * const *argv) {
     }
   }
 
-  // DEBUG STATEMENT 
-  // for different threads input use './fibs -n [nthreads] < input.txt'
-  printf("number of threads: %i\n", num_threads);
-
-
   // Create job queue.
   struct job_queue jq;
   job_queue_init(&jq, 64);

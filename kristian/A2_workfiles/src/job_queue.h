@@ -12,7 +12,6 @@ struct job_queue {
   int capacity;
   struct job_node* head;
   struct job_node* tail;
-  //pthread_mutex_t head_lock, tail_lock;
 };
 
 // Initialise a job queue with the given capacity.  The queue starts out

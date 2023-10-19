@@ -4,16 +4,11 @@
 
 #include "job_queue.h"
 
-// Signaling protocol for worker threads
+// Signaling protocol for threads
 pthread_cond_t push_cond = PTHREAD_COND_INITIALIZER;
 pthread_cond_t pop_cond = PTHREAD_COND_INITIALIZER;
-//pthread_mutex_t init_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 volatile int size;
-
-// ... for destroying queue
-//pthread_cond_t destroy_cond = PTHREAD_COND_INITIALIZER;
-//pthread_mutex_t destroy_lock = PTHREAD_MUTEX_INITIALIZER;
 volatile int destroy_queue = 0;
 
 
@@ -24,11 +19,8 @@ int job_queue_init(struct job_queue *job_queue, int capacity) {
   assert(pthread_mutex_lock(&m) == 0);
   job_queue->capacity = capacity;
   job_queue->head = job_queue->tail = NULL;
-  //pthread_mutex_init(&job_queue->head_lock, NULL);
-  //pthread_mutex_init(&job_queue->tail_lock, NULL);
   assert(pthread_mutex_unlock(&m) == 0);
 
-  printf("init()\n");
   return EXIT_SUCCESS;
 }
 
@@ -36,13 +28,12 @@ int job_queue_destroy(struct job_queue *job_queue) {
   assert(job_queue != NULL);
 
   assert(pthread_mutex_lock(&m) == 0);
-  // Set destroy to true
+  // Set destroy
   destroy_queue = 1;
   // Signal waiting pop() requests
   assert(pthread_cond_signal(&pop_cond) == 0);
   assert(pthread_mutex_unlock(&m) == 0);
 
-  printf("destroy()\n");
   return EXIT_SUCCESS;
 }
 
@@ -52,9 +43,7 @@ int job_queue_push(struct job_queue *job_queue, void *data) {
   assert(pthread_mutex_lock(&m) == 0);
   // Block requests when full, signal pop() and wait until availability in queue
   while (size == job_queue->capacity) {
-    printf("push(): signal pop\n");
     assert(pthread_cond_signal(&pop_cond) == 0);
-    printf("push() wait\n");
     assert(pthread_cond_wait(&push_cond, &m) == 0);
   }
 
@@ -75,10 +64,10 @@ int job_queue_push(struct job_queue *job_queue, void *data) {
   // Increase size count
   assert(size < job_queue->capacity);
   size++;
+  
   assert(pthread_cond_signal(&pop_cond) == 0);
   assert(pthread_mutex_unlock(&m) == 0);
 
-  printf("push(): job size = %i\n", size);
   return EXIT_SUCCESS;
 }
 
@@ -92,10 +81,8 @@ int job_queue_pop(struct job_queue *job_queue, void **data) {
     if (destroy_queue) {
       assert(pthread_cond_signal(&pop_cond) == 0);
       assert(pthread_mutex_unlock(&m) == 0);
-      printf("return -1\n");
       return -1;
     }
-    printf("pop() wait\n");
     assert(pthread_cond_wait(&pop_cond, &m) == 0);
   }
 
@@ -106,23 +93,16 @@ int job_queue_pop(struct job_queue *job_queue, void **data) {
   job_queue->head = job_queue->head->next;
 
   // Decrease size count
-  assert(size > 0); // << BUG! ASSERT CATCH SIZE = 0 AT RANDOM. SHOULDN'T BE.
+  assert(size > 0);
   size -= 1;
-
-  // If job-queue is empty and set to destroy, signal destroy
-  // if (destroy_queue && job_queue->head == NULL) {
-  //   assert(pthread_cond_signal(&destroy_cond) == 0);
-  // }
   
   // If job-queue is empty, signal push()
   if (!destroy_queue && job_queue->head == NULL) {
-    printf("pop(): signal push\n");
     assert(pthread_cond_signal(&push_cond) == 0);
   }
 
   free(tmp);
   assert(pthread_mutex_unlock(&m) == 0);
 
-  printf("pop(): job size = %i\n", size);
   return EXIT_SUCCESS;
 }
