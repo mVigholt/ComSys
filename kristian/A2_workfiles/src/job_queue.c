@@ -105,13 +105,13 @@ int job_queue_pop(struct job_queue *job_queue, void **data) {
   job_queue->head = job_queue->head->next;
 
   // Decrease size count
-  assert(size > 0);
+  assert(size > 0); // << BUG! ASSERT CATCH SIZE = 0 AT RANDOM. SHOULDN'T BE.
   size -= 1;
 
   // If job-queue is empty and set to destroy, signal destroy
-  if (destroy_queue && job_queue->head == NULL) {
-    assert(pthread_cond_signal(&destroy_cond) == 0);
-  }
+  // if (destroy_queue && job_queue->head == NULL) {
+  //   assert(pthread_cond_signal(&destroy_cond) == 0);
+  // }
   
   // If job-queue is empty, signal push()
   if (!destroy_queue && job_queue->head == NULL) {
