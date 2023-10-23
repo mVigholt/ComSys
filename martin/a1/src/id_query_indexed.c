@@ -26,14 +26,7 @@ struct indexed_data* mk_indexed(struct record* rs, int n) {
     arr[i].record = &rs[i];
   }
 
-  for (int i = 0; i < n; i++) {
-    printf("%d\n", arr[i].osm_id);
-  }
-
-
   struct indexed_data* data_out = malloc(sizeof(struct indexed_data));
-  // data_out->irs = malloc(sizeof(arr));
-  // data_out->irs = &arr;
   data_out->irs = arr;
   data_out->n = n;
   return data_out;
@@ -46,12 +39,9 @@ void free_indexed(struct indexed_data* data) {
 
 const struct record* lookup_indexed(struct indexed_data *data, int64_t needle) {
   int size = data->n;
-  printf("Find match \n");
   for (int i = 0; i < size; i++) {
     int64_t id = data->irs[i].osm_id;
-    printf("%ld \n", id);
     if (id == needle) {
-      printf("succes \n");
       return data->irs[i].record;
     }
   }
@@ -60,7 +50,7 @@ const struct record* lookup_indexed(struct indexed_data *data, int64_t needle) {
 
 int main(int argc, char** argv) {
   return id_query_loop(argc, argv,
-                    (mk_index_fn)mk_indexed,
-                    (free_index_fn)free_indexed,
-                    (lookup_fn)lookup_indexed);
+                      (mk_index_fn)mk_indexed,
+                      (free_index_fn)free_indexed,
+                      (lookup_fn)lookup_indexed);
 }

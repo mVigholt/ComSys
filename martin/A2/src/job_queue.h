@@ -8,8 +8,9 @@ struct job_queue {
   int capacity; //size of array
   int size; //number of elements currently in the queue
   int front; //first element in queue
-  int destroyed; //0 if not destroyed
-  void** queue; //pointer to the queue
+  int destroy; //0 if not destroyed
+  int popCount;
+  void** queue; //pointer to the queue (array of void*)
   pthread_mutex_t lock;
   pthread_cond_t isEmpty;
   pthread_cond_t isNotFull;
