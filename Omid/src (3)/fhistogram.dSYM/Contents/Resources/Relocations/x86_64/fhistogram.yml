@@ -1,0 +1,32 @@
+---
+triple:          'x86_64-apple-darwin'
+binary-path:     fhistogram
+relocations:
+  - { offsetInCU: 0xDC, offset: 0xDC, size: 0x8, addend: 0x0, symName: _move_lines, symObjAddr: 0x0, symBinAddr: 0x1000034A9, symSize: 0x4A }
+  - { offsetInCU: 0x757, offset: 0x757, size: 0x8, addend: 0x0, symName: _global_histogram, symObjAddr: 0x24A0, symBinAddr: 0x100008000, symSize: 0x0 }
+  - { offsetInCU: 0x773, offset: 0x773, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x3B0, symBinAddr: 0x100003859, symSize: 0xD9 }
+  - { offsetInCU: 0x7F6, offset: 0x7F6, size: 0x8, addend: 0x0, symName: _fhistogram, symObjAddr: 0x25D, symBinAddr: 0x100003706, symSize: 0x153 }
+  - { offsetInCU: 0x7FE, offset: 0x7FE, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x3B0, symBinAddr: 0x100003859, symSize: 0xD9 }
+  - { offsetInCU: 0x867, offset: 0x867, size: 0x8, addend: 0x0, symName: _update_histogram, symObjAddr: 0x20A, symBinAddr: 0x1000036B3, symSize: 0x53 }
+  - { offsetInCU: 0x86F, offset: 0x86F, size: 0x8, addend: 0x0, symName: _fhistogram, symObjAddr: 0x25D, symBinAddr: 0x100003706, symSize: 0x153 }
+  - { offsetInCU: 0x8C9, offset: 0x8C9, size: 0x8, addend: 0x0, symName: _merge_histogram, symObjAddr: 0x189, symBinAddr: 0x100003632, symSize: 0x81 }
+  - { offsetInCU: 0x8D1, offset: 0x8D1, size: 0x8, addend: 0x0, symName: _update_histogram, symObjAddr: 0x20A, symBinAddr: 0x1000036B3, symSize: 0x53 }
+  - { offsetInCU: 0x926, offset: 0x926, size: 0x8, addend: 0x0, symName: _print_histogram, symObjAddr: 0x65, symBinAddr: 0x10000350E, symSize: 0x124 }
+  - { offsetInCU: 0x92E, offset: 0x92E, size: 0x8, addend: 0x0, symName: _merge_histogram, symObjAddr: 0x189, symBinAddr: 0x100003632, symSize: 0x81 }
+  - { offsetInCU: 0x9E7, offset: 0x9E7, size: 0x8, addend: 0x0, symName: _clear_line, symObjAddr: 0x4A, symBinAddr: 0x1000034F3, symSize: 0x1B }
+  - { offsetInCU: 0x9EF, offset: 0x9EF, size: 0x8, addend: 0x0, symName: _print_histogram, symObjAddr: 0x65, symBinAddr: 0x10000350E, symSize: 0x124 }
+  - { offsetInCU: 0xA04, offset: 0xA04, size: 0x8, addend: 0x0, symName: _move_lines, symObjAddr: 0x0, symBinAddr: 0x1000034A9, symSize: 0x4A }
+  - { offsetInCU: 0xA0C, offset: 0xA0C, size: 0x8, addend: 0x0, symName: _clear_line, symObjAddr: 0x4A, symBinAddr: 0x1000034F3, symSize: 0x1B }
+  - { offsetInCU: 0xDB, offset: 0xAFD, size: 0x8, addend: 0x0, symName: _job_queue_init, symObjAddr: 0x0, symBinAddr: 0x100003932, symSize: 0xAD }
+  - { offsetInCU: 0x1B5, offset: 0xBD7, size: 0x8, addend: 0x0, symName: _job_queue_pop, symObjAddr: 0x22D, symBinAddr: 0x100003B5F, symSize: 0xAF }
+  - { offsetInCU: 0x1FD, offset: 0xC1F, size: 0x8, addend: 0x0, symName: _job_queue_push, symObjAddr: 0x170, symBinAddr: 0x100003AA2, symSize: 0xBD }
+  - { offsetInCU: 0x205, offset: 0xC27, size: 0x8, addend: 0x0, symName: _job_queue_pop, symObjAddr: 0x22D, symBinAddr: 0x100003B5F, symSize: 0xAF }
+  - { offsetInCU: 0x241, offset: 0xC63, size: 0x8, addend: 0x0, symName: _job_queue_destroy, symObjAddr: 0xE6, symBinAddr: 0x100003A18, symSize: 0x8A }
+  - { offsetInCU: 0x249, offset: 0xC6B, size: 0x8, addend: 0x0, symName: _job_queue_push, symObjAddr: 0x170, symBinAddr: 0x100003AA2, symSize: 0xBD }
+  - { offsetInCU: 0x269, offset: 0xC8B, size: 0x8, addend: 0x0, symName: _isEmpty, symObjAddr: 0xCD, symBinAddr: 0x1000039FF, symSize: 0x19 }
+  - { offsetInCU: 0x271, offset: 0xC93, size: 0x8, addend: 0x0, symName: _job_queue_destroy, symObjAddr: 0xE6, symBinAddr: 0x100003A18, symSize: 0x8A }
+  - { offsetInCU: 0x29A, offset: 0xCBC, size: 0x8, addend: 0x0, symName: _isFull, symObjAddr: 0xAD, symBinAddr: 0x1000039DF, symSize: 0x20 }
+  - { offsetInCU: 0x2A2, offset: 0xCC4, size: 0x8, addend: 0x0, symName: _isEmpty, symObjAddr: 0xCD, symBinAddr: 0x1000039FF, symSize: 0x19 }
+  - { offsetInCU: 0x2D4, offset: 0xCF6, size: 0x8, addend: 0x0, symName: _job_queue_init, symObjAddr: 0x0, symBinAddr: 0x100003932, symSize: 0xAD }
+  - { offsetInCU: 0x2DC, offset: 0xCFE, size: 0x8, addend: 0x0, symName: _isFull, symObjAddr: 0xAD, symBinAddr: 0x1000039DF, symSize: 0x20 }
+...

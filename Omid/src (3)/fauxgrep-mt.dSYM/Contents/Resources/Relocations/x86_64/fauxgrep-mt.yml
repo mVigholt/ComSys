@@ -1,0 +1,20 @@
+---
+triple:          'x86_64-apple-darwin'
+binary-path:     fauxgrep-mt
+relocations:
+  - { offsetInCU: 0xDD, offset: 0xDD, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x1000039B7, symSize: 0x111 }
+  - { offsetInCU: 0x524, offset: 0x524, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x1000039B7, symSize: 0x111 }
+  - { offsetInCU: 0x593, offset: 0x593, size: 0x8, addend: 0x0, symName: ___func__.0, symObjAddr: 0x164, symBinAddr: 0x100003E44, symSize: 0x0 }
+  - { offsetInCU: 0xDB, offset: 0x6BA, size: 0x8, addend: 0x0, symName: _job_queue_init, symObjAddr: 0x0, symBinAddr: 0x100003AC8, symSize: 0xAD }
+  - { offsetInCU: 0x1B5, offset: 0x794, size: 0x8, addend: 0x0, symName: _job_queue_pop, symObjAddr: 0x22D, symBinAddr: 0x100003CF5, symSize: 0xAF }
+  - { offsetInCU: 0x1FD, offset: 0x7DC, size: 0x8, addend: 0x0, symName: _job_queue_push, symObjAddr: 0x170, symBinAddr: 0x100003C38, symSize: 0xBD }
+  - { offsetInCU: 0x205, offset: 0x7E4, size: 0x8, addend: 0x0, symName: _job_queue_pop, symObjAddr: 0x22D, symBinAddr: 0x100003CF5, symSize: 0xAF }
+  - { offsetInCU: 0x241, offset: 0x820, size: 0x8, addend: 0x0, symName: _job_queue_destroy, symObjAddr: 0xE6, symBinAddr: 0x100003BAE, symSize: 0x8A }
+  - { offsetInCU: 0x249, offset: 0x828, size: 0x8, addend: 0x0, symName: _job_queue_push, symObjAddr: 0x170, symBinAddr: 0x100003C38, symSize: 0xBD }
+  - { offsetInCU: 0x269, offset: 0x848, size: 0x8, addend: 0x0, symName: _isEmpty, symObjAddr: 0xCD, symBinAddr: 0x100003B95, symSize: 0x19 }
+  - { offsetInCU: 0x271, offset: 0x850, size: 0x8, addend: 0x0, symName: _job_queue_destroy, symObjAddr: 0xE6, symBinAddr: 0x100003BAE, symSize: 0x8A }
+  - { offsetInCU: 0x29A, offset: 0x879, size: 0x8, addend: 0x0, symName: _isFull, symObjAddr: 0xAD, symBinAddr: 0x100003B75, symSize: 0x20 }
+  - { offsetInCU: 0x2A2, offset: 0x881, size: 0x8, addend: 0x0, symName: _isEmpty, symObjAddr: 0xCD, symBinAddr: 0x100003B95, symSize: 0x19 }
+  - { offsetInCU: 0x2D4, offset: 0x8B3, size: 0x8, addend: 0x0, symName: _job_queue_init, symObjAddr: 0x0, symBinAddr: 0x100003AC8, symSize: 0xAD }
+  - { offsetInCU: 0x2DC, offset: 0x8BB, size: 0x8, addend: 0x0, symName: _isFull, symObjAddr: 0xAD, symBinAddr: 0x100003B75, symSize: 0x20 }
+...
