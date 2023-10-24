@@ -5,49 +5,51 @@
 #include "job_queue.h"
 
 int job_queue_init(struct job_queue *job_queue, int capacity) {
-  //assert(0);
   if (capacity > 0){
     job_queue->capacity = capacity;
     job_queue->front = 0;
     job_queue->size = 0; 
     job_queue->destroy = 0;
-    job_queue->popCount = 0;
     job_queue->queue = malloc(sizeof(void*) * capacity);
     pthread_mutex_init(&job_queue->lock, NULL); 
-    pthread_cond_init(&job_queue->isEmpty, NULL);
-    pthread_cond_init(&job_queue->isNotEmpty, NULL);
-    pthread_cond_init(&job_queue->isNotFull, NULL);
+    pthread_cond_init(&job_queue->signalDestroy, NULL);
+    pthread_cond_init(&job_queue->signalPop, NULL);
+    pthread_cond_init(&job_queue->signalPush, NULL);
     return EXIT_SUCCESS;
   }
   return EXIT_FAILURE;
 }
 
 int job_queue_destroy(struct job_queue* job_queue) {
-  //assert(0);
   if (job_queue != NULL) {
+    pthread_mutex_lock(&job_queue->lock);
     job_queue->destroy = 1;
-    //pthread_mutex_lock(&job_queue->lock);
-    while (job_queue->size > 0) {
-      pthread_cond_wait(&job_queue->isEmpty, &job_queue->lock);
+    while (job_queue->size > 0){
+      pthread_cond_wait(&job_queue->signalDestroy, &job_queue->lock);
     }
+    //pthread_cond_broadcast(&job_queue->signalPop);
+    pthread_mutex_unlock(&job_queue->lock);
+    
     free(job_queue->queue);
-    //pthread_mutex_unlock(&job_queue->lock);
+    pthread_mutex_destroy(&job_queue->lock);
+    pthread_cond_destroy(&job_queue->signalDestroy);
+    pthread_cond_destroy(&job_queue->signalPop);
+    pthread_cond_destroy(&job_queue->signalPush);
     return EXIT_SUCCESS;
   }
   return EXIT_FAILURE;
 }
 
 int job_queue_push(struct job_queue* job_queue, void* data) {
-  //assert(0);
   if ((job_queue != NULL)){
     pthread_mutex_lock(&job_queue->lock);
     while (job_queue->size == job_queue->capacity) {
-      pthread_cond_wait(&job_queue->isNotFull, &job_queue->lock);  
+      pthread_cond_wait(&job_queue->signalPush, &job_queue->lock);  
     }
     int next_element = ((job_queue->front + 1) + (job_queue->size - 1)) % job_queue->capacity;
     job_queue->queue[next_element] = data;
-    job_queue->size++;
-    pthread_cond_signal(&job_queue->isNotEmpty);
+    job_queue->size ++;
+    pthread_cond_signal(&job_queue->signalPop);
     pthread_mutex_unlock(&job_queue->lock);
     return EXIT_SUCCESS;
   }
@@ -55,35 +57,30 @@ int job_queue_push(struct job_queue* job_queue, void* data) {
 }
 
 int job_queue_pop(struct job_queue* job_queue, void** data) {
-  //assert(0);
   if ((job_queue != NULL)){
     pthread_mutex_lock(&job_queue->lock);
-    while ((job_queue->size <= 0) && (job_queue->destroy == 0)) {
-      job_queue->popCount++;
-      pthread_cond_wait(&job_queue->isNotEmpty, &job_queue->lock);
-      job_queue->popCount--;
+    while (job_queue->size == 0) {
+      pthread_cond_wait(&job_queue->signalPop, &job_queue->lock);
     }
+
     if (job_queue->size > 0) {
       *data = job_queue->queue[job_queue->front];
       job_queue->front = (job_queue->front + 1) % job_queue->capacity;
-      job_queue->size--;
+      job_queue->size --;
     }
     if (job_queue->destroy == 0) {
-      pthread_cond_signal(&job_queue->isNotFull); //wakeup waiting push
+      pthread_cond_signal(&job_queue->signalPush);
     } else {
-      if (job_queue->size > 0) {
-        pthread_cond_signal(&job_queue->isNotEmpty); //wakeup waiting pop
-      } else {
-        if (job_queue->popCount > 0) {
-          pthread_cond_signal(&job_queue->isNotEmpty); //wakeup waiting pop
-          return -1;
-        } else {
-          pthread_cond_signal(&job_queue->isEmpty);
-        }
+      if (job_queue->size == 0) {
+        job_queue->size --;
+        pthread_cond_signal(&job_queue->signalDestroy);
+      } else if (job_queue->size < 0) {
+        pthread_mutex_unlock(&job_queue->lock);
+        return -1;
       }
     }
     pthread_mutex_unlock(&job_queue->lock);
     return EXIT_SUCCESS;
-  }
+  }  
   return EXIT_FAILURE;
 }

@@ -9,12 +9,11 @@ struct job_queue {
   int size; //number of elements currently in the queue
   int front; //first element in queue
   int destroy; //0 if not destroyed
-  int popCount;
   void** queue; //pointer to the queue (array of void*)
   pthread_mutex_t lock;
-  pthread_cond_t isEmpty;
-  pthread_cond_t isNotFull;
-  pthread_cond_t isNotEmpty;
+  pthread_cond_t signalDestroy;
+  pthread_cond_t signalPop;
+  pthread_cond_t signalPush;
 };
 
 // Initialise a job queue with the given capacity.  The queue starts out
