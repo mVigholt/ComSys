@@ -4,11 +4,11 @@
 #include <pthread.h>
 
 struct job_queue {
-  //int dummy;
   int capacity; //size of array
   int size; //number of elements currently in the queue
   int front; //first element in queue
-  int destroy; //0 if not destroyed
+  int kill; //1 if destroy has been called otherwise 0
+  int waitingPop; //number of waiting pop requests
   void** queue; //pointer to the queue (array of void*)
   pthread_mutex_t lock;
   pthread_cond_t signalDestroy;

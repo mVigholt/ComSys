@@ -9,7 +9,8 @@ int job_queue_init(struct job_queue *job_queue, int capacity) {
     job_queue->capacity = capacity;
     job_queue->front = 0;
     job_queue->size = 0; 
-    job_queue->destroy = 0;
+    job_queue->kill = 0;
+    job_queue->waitingPop = 0;
     job_queue->queue = malloc(sizeof(void*) * capacity);
     pthread_mutex_init(&job_queue->lock, NULL); 
     pthread_cond_init(&job_queue->signalDestroy, NULL);
@@ -23,13 +24,11 @@ int job_queue_init(struct job_queue *job_queue, int capacity) {
 int job_queue_destroy(struct job_queue* job_queue) {
   if (job_queue != NULL) {
     pthread_mutex_lock(&job_queue->lock);
-    job_queue->destroy = 1;
-    while (job_queue->size > 0){
+    job_queue->kill = 1;
+    while ((job_queue->size > 0 ) || (job_queue->waitingPop > 0)){
       pthread_cond_wait(&job_queue->signalDestroy, &job_queue->lock);
     }
-    //pthread_cond_broadcast(&job_queue->signalPop);
     pthread_mutex_unlock(&job_queue->lock);
-    
     free(job_queue->queue);
     pthread_mutex_destroy(&job_queue->lock);
     pthread_cond_destroy(&job_queue->signalDestroy);
@@ -59,24 +58,31 @@ int job_queue_push(struct job_queue* job_queue, void* data) {
 int job_queue_pop(struct job_queue* job_queue, void** data) {
   if ((job_queue != NULL)){
     pthread_mutex_lock(&job_queue->lock);
-    while (job_queue->size == 0) {
+    job_queue->waitingPop ++;
+    while ((job_queue->size == 0) && (job_queue->kill == 0)) {
       pthread_cond_wait(&job_queue->signalPop, &job_queue->lock);
     }
-
+    job_queue->waitingPop --;
+    int Empty = 1;
     if (job_queue->size > 0) {
       *data = job_queue->queue[job_queue->front];
       job_queue->front = (job_queue->front + 1) % job_queue->capacity;
       job_queue->size --;
+      Empty = 0;
     }
-    if (job_queue->destroy == 0) {
+    if (job_queue->kill == 0) {
       pthread_cond_signal(&job_queue->signalPush);
     } else {
       if (job_queue->size == 0) {
-        job_queue->size --;
-        pthread_cond_signal(&job_queue->signalDestroy);
-      } else if (job_queue->size < 0) {
-        pthread_mutex_unlock(&job_queue->lock);
-        return -1;
+        if (job_queue->waitingPop > 0){
+          pthread_cond_signal(&job_queue->signalPop);
+        } else {
+          pthread_cond_signal(&job_queue->signalDestroy);
+        }
+        if (Empty == 1) {
+          pthread_mutex_unlock(&job_queue->lock);
+          return -1;
+        }
       }
     }
     pthread_mutex_unlock(&job_queue->lock);
