@@ -22,6 +22,70 @@ pthread_mutex_t stdout_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #include "histogram.h"
 
+//--------------------Copy from fhistogram:
+int global_histogram[8] = { 0 };
+
+int fhistogram(char const *path) {
+  FILE *f = fopen(path, "r");
+
+  int local_histogram[8] = { 0 };
+
+  if (f == NULL) {
+    fflush(stdout);
+    warn("failed to open %s", path);
+    return -1;
+  }
+
+  int i = 0;
+
+  char c;
+  while (fread(&c, sizeof(c), 1, f) == 1) {
+    i++;
+
+    update_histogram(local_histogram, c);
+    if ((i % 100000) == 0) {
+      pthread_mutex_lock(&stdout_mutex); //
+      merge_histogram(local_histogram, global_histogram);
+      print_histogram(global_histogram);
+      pthread_mutex_unlock(&stdout_mutex); //
+    }
+  }
+
+  fclose(f);
+
+  pthread_mutex_lock(&stdout_mutex); //
+  merge_histogram(local_histogram, global_histogram);
+  print_histogram(global_histogram);
+  pthread_mutex_unlock(&stdout_mutex); //
+
+  return 0;
+}
+//--------------------Copy done
+
+//--------------------Copy from fibs:
+// Each thread will run this function.  The thread argument is a
+// pointer to a job queue.
+void* worker(void *arg) {
+  struct job_queue *jq = arg;
+
+  while (1) {
+    char *line;
+    if (job_queue_pop(jq, (void**)&line) == 0) {
+      //fib_line(line);
+      fhistogram(line); //
+      free(line);
+    } else {
+      // If job_queue_pop() returned non-zero, that means the queue is
+      // being killed (or some other error occured).  In any case,
+      // that means it's time for this thread to die.
+      break;
+    }
+  }
+
+  return NULL;
+}
+//--------------------Copy done
+
 int main(int argc, char * const *argv) {
   if (argc < 2) {
     err(1, "usage: paths...");
@@ -49,7 +113,20 @@ int main(int argc, char * const *argv) {
     paths = &argv[1];
   }
 
-  assert(0); // Initialise the job queue and some worker threads here.
+  // Initialise the job queue and some worker threads here.
+  //--------------------Copy from fibs:
+  // Create job queue.
+  struct job_queue jq;
+  job_queue_init(&jq, 64);
+
+  // Start up the worker threads.
+  pthread_t *threads = calloc(num_threads, sizeof(pthread_t));
+  for (int i = 0; i < num_threads; i++) {
+    if (pthread_create(&threads[i], NULL, &worker, &jq) != 0) {
+      err(1, "pthread_create() failed");
+    }
+  }
+  //--------------------Copy done
 
   // FTS_LOGICAL = follow symbolic links
   // FTS_NOCHDIR = do not change the working directory of the process
@@ -70,7 +147,10 @@ int main(int argc, char * const *argv) {
     case FTS_D:
       break;
     case FTS_F:
-      assert(0); // Process the file p->fts_path, somehow.
+      //--------------------Copy from fibs:
+      //   job_queue_push(&jq, (void*)strdup(line));
+      //--------------------Copy from fibs:
+      job_queue_push(&jq, (void*)strdup(p->fts_path)); //
       break;
     default:
       break;
@@ -79,7 +159,20 @@ int main(int argc, char * const *argv) {
 
   fts_close(ftsp);
 
-  assert(0); // Shut down the job queue and the worker threads here.
+  // Shut down the job queue and the worker threads here.
+  //--------------------Copy from fibs:
+  // Destroy the queue.
+  job_queue_destroy(&jq);
+
+  // Wait for all threads to finish.  This is important, at some may
+  // still be working on their job.
+  for (int i = 0; i < num_threads; i++) {
+    if (pthread_join(threads[i], NULL) != 0) {
+      err(1, "pthread_join() failed");
+    }
+  }
+  free(threads);
+  //--------------------Copy done
 
   move_lines(9);
 
