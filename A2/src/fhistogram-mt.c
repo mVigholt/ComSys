@@ -44,19 +44,19 @@ int fhistogram(char const *path) {
 
     update_histogram(local_histogram, c);
     if ((i % 100000) == 0) {
-      pthread_mutex_lock(&stdout_mutex); //
+      pthread_mutex_lock(&stdout_mutex);//*
       merge_histogram(local_histogram, global_histogram);
       print_histogram(global_histogram);
-      pthread_mutex_unlock(&stdout_mutex); //
+      pthread_mutex_unlock(&stdout_mutex);//*
     }
   }
 
   fclose(f);
 
-  pthread_mutex_lock(&stdout_mutex); //
+  pthread_mutex_lock(&stdout_mutex);//*
   merge_histogram(local_histogram, global_histogram);
   print_histogram(global_histogram);
-  pthread_mutex_unlock(&stdout_mutex); //
+  pthread_mutex_unlock(&stdout_mutex);//*
 
   return 0;
 }
@@ -72,7 +72,7 @@ void* worker(void *arg) {
     char *line;
     if (job_queue_pop(jq, (void**)&line) == 0) {
       //fib_line(line);
-      fhistogram(line); //
+      fhistogram(line);//*
       free(line);
     } else {
       // If job_queue_pop() returned non-zero, that means the queue is
@@ -147,10 +147,11 @@ int main(int argc, char * const *argv) {
     case FTS_D:
       break;
     case FTS_F:
+      // Process the file p->fts_path, somehow.
       //--------------------Copy from fibs:
-      //   job_queue_push(&jq, (void*)strdup(line));
+      //job_queue_push(&jq, (void*)strdup(line));
+      job_queue_push(&jq, (void*)strdup(p->fts_path));//*
       //--------------------Copy from fibs:
-      job_queue_push(&jq, (void*)strdup(p->fts_path)); //
       break;
     default:
       break;

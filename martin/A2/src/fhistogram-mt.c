@@ -147,6 +147,7 @@ int main(int argc, char * const *argv) {
     case FTS_D:
       break;
     case FTS_F:
+      // Process the file p->fts_path, somehow.
       //--------------------Copy from fibs:
       //   job_queue_push(&jq, (void*)strdup(line));
       //--------------------Copy from fibs:
