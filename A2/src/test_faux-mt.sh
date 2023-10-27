@@ -38,7 +38,7 @@ echo "--------------------------------------------------"
 for i in $(seq 1 $tests) 
 do
   echo "Running with $i thread(s).."
-  echo "time ./fauxgrep-mt -n ${i} ../"
+  echo "time ./fauxgrep-mt -n ${i} ../ > /dev/null"
   time ./fauxgrep-mt -n ${i} $needle ../ >/dev/null
   echo ""
 done
