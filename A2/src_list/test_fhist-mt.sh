@@ -30,7 +30,7 @@ echo ""
 
 # Testing fhistogram-mt wit job_queue.c
 echo "--------------------------------------------------"
-echo "Testing 'fhistogram-mt.c' with up to 5 threads"
+echo "Testing 'fhistogram-mt.c' with up to $tests threads"
 echo "--------------------------------------------------"
 
 for i in $(seq 1 $tests) 

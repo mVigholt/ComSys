@@ -3,10 +3,12 @@
 # Exit immediately if any command below fails.
 set -e
 
-make fhistogram-mt
-make fhistogram
+make fauxgrep-mt
+make fauxgrep
 
 tests=5
+
+needle="int"
 
 for i in $(seq 2 $tests) 
 do
@@ -22,22 +24,22 @@ exitcode=0
 
 # Testing fhistogram wit job_queue.c
 echo "--------------------------------------------------"
-echo "Testing 'fhistogram.c' for refference"
+echo "Testing 'fauxgrep.c' for refference"
 echo "--------------------------------------------------"
-echo "time ./fhistogram ../"
-time ./fhistogram ../
+echo "time ./fauxgrep ../"
+time ./fauxgrep $needle ../ >/dev/null
 echo ""
 
 # Testing fhistogram-mt wit job_queue.c
 echo "--------------------------------------------------"
-echo "Testing 'fhistogram-mt.c' with up to $tests threads"
+echo "Testing 'fauxgrep-mt.c' with up to $tests threads"
 echo "--------------------------------------------------"
 
 for i in $(seq 1 $tests) 
 do
   echo "Running with $i thread(s).."
-  echo "time ./fhistogram-mt -n ${i} ../"
-  time ./fhistogram-mt -n ${i} ../
+  echo "time ./fauxgrep-mt -n ${i} ../"
+  time ./fauxgrep-mt -n ${i} $needle ../ >/dev/null
   echo ""
 done
 
