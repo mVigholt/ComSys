@@ -22,7 +22,7 @@ exitcode=0
 
 # Testing fhistogram wit job_queue.c
 echo "--------------------------------------------------"
-echo "Testing 'fhistogram.c' for refference"
+echo "Testing 'fhistogram.c' for reference"
 echo "--------------------------------------------------"
 echo "time ./fhistogram ../"
 time ./fhistogram ../

@@ -24,7 +24,7 @@ exitcode=0
 
 # Testing fhistogram wit job_queue.c
 echo "--------------------------------------------------"
-echo "Testing 'fauxgrep.c' for refference"
+echo "Testing 'fauxgrep.c' for reference"
 echo "--------------------------------------------------"
 echo "time ./fauxgrep ../"
 time ./fauxgrep $needle ../ >/dev/null
