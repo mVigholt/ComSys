@@ -71,21 +71,36 @@ int job_queue_pop(struct job_queue* job_queue, void** data) {
       job_queue->size --;
       Empty = 0;
     }
-    if (job_queue->kill == 0) {
+    // if (job_queue->kill == 0) {
+    //   pthread_cond_signal(&job_queue->signalPush);
+    // } else {
+    //   if (job_queue->size == 0) {
+    //     if (job_queue->waitingPop > 0){
+    //       pthread_cond_signal(&job_queue->signalPop);
+    //     } else {
+    //       pthread_cond_signal(&job_queue->signalDestroy);
+    //     }
+    //     if (Empty == 1) {
+    //       pthread_mutex_unlock(&job_queue->lock);
+    //       return -1;
+    //     }
+    //   }
+    // }
+    // pthread_mutex_unlock(&job_queue->lock);
+    // return EXIT_SUCCESS;
+    if (job_queue->size < job_queue->capacity) {
       pthread_cond_signal(&job_queue->signalPush);
-    } else {
-      if (job_queue->size == 0) {
-        if (job_queue->waitingPop > 0){
-          pthread_cond_signal(&job_queue->signalPop);
-        } else {
-          pthread_cond_signal(&job_queue->signalDestroy);
-        }
-        if (Empty == 1) {
-          pthread_mutex_unlock(&job_queue->lock);
-          return -1;
-        }
-      }
     }
+    if (job_queue->size > 0 || job_queue->waitingPop > 0) {
+      pthread_cond_signal(&job_queue->signalPop);
+    }
+    if (job_queue->kill > 0 && job_queue->waitingPop <= 0) {
+      pthread_cond_signal(&job_queue->signalDestroy);
+    }
+    if (Empty == 1) {
+      pthread_mutex_unlock(&job_queue->lock);
+      return -1;
+    } 
     pthread_mutex_unlock(&job_queue->lock);
     return EXIT_SUCCESS;
   }  
