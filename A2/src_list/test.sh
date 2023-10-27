@@ -8,7 +8,7 @@ make fibs
 echo "Running the tests.."
 exitcode=0
 
-for f in test_files/*.input
+for f in test_files/fibs/*.input
 do
   for i in 1 2 3 4 5
   do
