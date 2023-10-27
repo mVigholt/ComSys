@@ -5,6 +5,11 @@ set -e
 
 make fhistogram-mt
 
+for i in 2 3 4 5
+do
+  cp test_files/fhistogram/50000records.tsv test_files/fhistogram/50000records_${i}.tsv
+done
+
 echo "Running the tests.."
 exitcode=0
 
@@ -22,6 +27,11 @@ do
     echo ""
   done
 done
+
+rm test_files/fhistogram/50000records_2.tsv
+rm test_files/fhistogram/50000records_3.tsv
+rm test_files/fhistogram/50000records_4.tsv
+rm test_files/fhistogram/50000records_5.tsv
 
 echo "Tests passed :)"
 exit $exitcode
