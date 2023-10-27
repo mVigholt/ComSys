@@ -21,7 +21,7 @@
 // very handy.
 #include <err.h>
 
-#include "job_queue_array.h"
+#include "job_queue.h"
 
 // Whenever we print to the screen, we will first lock this mutex.
 // This ensures that multiple threads do not try to print

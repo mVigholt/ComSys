@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "job_queue_array.h"
+#include "job_queue.h"
 
 int job_queue_init(struct job_queue *job_queue, int capacity) {
   if (capacity > 0){

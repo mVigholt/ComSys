@@ -3,8 +3,15 @@
 
 #include <pthread.h>
 
+struct job_node {
+  void* data;
+  struct job_node* next;
+};
+
 struct job_queue {
-  int dummy;
+  int capacity;
+  struct job_node* head;
+  struct job_node* tail;
 };
 
 // Initialise a job queue with the given capacity.  The queue starts out

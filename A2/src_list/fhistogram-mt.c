@@ -6,44 +6,57 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <stdint.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fts.h>
 
+#include "job_queue.h"
+
+pthread_mutex_t stdout_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 // err.h contains various nonstandard BSD extensions, but they are
 // very handy.
 #include <err.h>
 
-#include <pthread.h>
+#include "histogram.h"
 
-#include "job_queue.h"
+//--------------------Copy from fhistogram:
+int global_histogram[8] = { 0 };
 
-char const* global_needle;//*
-
-//--------------------Copy from fauxgrep:
-int fauxgrep_file(char const *needle, char const *path) {
+int fhistogram(char const *path) {
   FILE *f = fopen(path, "r");
 
+  int local_histogram[8] = { 0 };
+
   if (f == NULL) {
+    fflush(stdout);
     warn("failed to open %s", path);
     return -1;
   }
 
-  char *line = NULL;
-  size_t linelen = 0;
-  int lineno = 1;
+  int i = 0;
 
-  while (getline(&line, &linelen, f) != -1) {
-    if (strstr(line, needle) != NULL) {
-      printf("%s:%d: %s", path, lineno, line);
+  char c;
+  while (fread(&c, sizeof(c), 1, f) == 1) {
+    i++;
+
+    update_histogram(local_histogram, c);
+    if ((i % 100000) == 0) {
+      pthread_mutex_lock(&stdout_mutex);//*
+      merge_histogram(local_histogram, global_histogram);
+      print_histogram(global_histogram);
+      pthread_mutex_unlock(&stdout_mutex);//*
     }
-
-    lineno++;
   }
 
-  free(line);
   fclose(f);
+
+  pthread_mutex_lock(&stdout_mutex);//*
+  merge_histogram(local_histogram, global_histogram);
+  print_histogram(global_histogram);
+  pthread_mutex_unlock(&stdout_mutex);//*
 
   return 0;
 }
@@ -59,7 +72,7 @@ void* worker(void *arg) {
     char *line;
     if (job_queue_pop(jq, (void**)&line) == 0) {
       //fib_line(line);
-      fauxgrep_file(global_needle, line);//*
+      fhistogram(line);//*
       free(line);
     } else {
       // If job_queue_pop() returned non-zero, that means the queue is
@@ -75,14 +88,12 @@ void* worker(void *arg) {
 
 int main(int argc, char * const *argv) {
   if (argc < 2) {
-    err(1, "usage: [-n INT] STRING paths...");
+    err(1, "usage: paths...");
     exit(1);
   }
 
   int num_threads = 1;
-  char const *needle = argv[1];
-  char * const *paths = &argv[2];
-
+  char * const *paths = &argv[1];
 
   if (argc > 3 && strcmp(argv[1], "-n") == 0) {
     // Since atoi() simply returns zero on syntax errors, we cannot
@@ -97,15 +108,10 @@ int main(int argc, char * const *argv) {
       err(1, "invalid thread count: %s", argv[2]);
     }
 
-    needle = argv[3];
-    paths = &argv[4];
-
+    paths = &argv[3];
   } else {
-    needle = argv[1];
-    paths = &argv[2];
+    paths = &argv[1];
   }
-  
-  global_needle = needle;//*
 
   // Initialise the job queue and some worker threads here.
   //--------------------Copy from fibs:
@@ -168,6 +174,8 @@ int main(int argc, char * const *argv) {
   }
   free(threads);
   //--------------------Copy done
+
+  move_lines(9);
 
   return 0;
 }
