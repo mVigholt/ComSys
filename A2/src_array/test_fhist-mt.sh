@@ -4,34 +4,47 @@
 set -e
 
 make fhistogram-mt
+make fhistogram
 
-for i in 2 3 4 5
+tests=5
+
+for i in $(seq 2 $tests) 
 do
-  cp test_files/fhistogram/50000records.tsv test_files/fhistogram/50000records_${i}.tsv
+  cp ../test_files/fhistogram/50000records.tsv ../test_files/fhistogram/50000records_${i}.tsv
 done
 
-echo "Running the tests.."
+echo "--------------------------------------------------"
+echo "Copying test files, please wait 3 sec.."
+
+sleep 3
+
 exitcode=0
 
+# Testing fhistogram wit job_queue.c
+echo "--------------------------------------------------"
+echo "Testing 'fhistogram.c' for refference"
+echo "--------------------------------------------------"
+echo "time ./fhistogram ../"
+time ./fhistogram ../
+echo ""
+
 # Testing fhistogram-mt wit job_queue.c
+echo "--------------------------------------------------"
 echo "Testing 'fhistogram-mt.c' with up to 5 threads"
-for f in test_files/fhistogram/*.tsv
+echo "--------------------------------------------------"
+
+for i in $(seq 1 $tests) 
 do
-  echo "--------------------"
-  echo "testing on file input: ${f}"
-  for i in 1 2 3 4 5
-  do
-    echo "Running with $i thread(s).."
-    echo "time ./fhistogram-mt -n ${i} ${f}"
-    time ./fhistogram-mt -n ${i} ${f}
-    echo ""
-  done
+  echo "Running with $i thread(s).."
+  echo "time ./fhistogram-mt -n ${i} ../"
+  time ./fhistogram-mt -n ${i} ../
+  echo ""
 done
 
-rm test_files/fhistogram/50000records_2.tsv
-rm test_files/fhistogram/50000records_3.tsv
-rm test_files/fhistogram/50000records_4.tsv
-rm test_files/fhistogram/50000records_5.tsv
+for i in $(seq 2 $tests) 
+do
+  rm ../test_files/fhistogram/50000records_${i}.tsv
+done
 
 echo "Tests passed :)"
 exit $exitcode

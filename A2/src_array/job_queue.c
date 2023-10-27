@@ -26,6 +26,7 @@ int job_queue_destroy(struct job_queue* job_queue) {
     pthread_mutex_lock(&job_queue->lock);
     job_queue->kill = 1;
     while ((job_queue->size > 0 ) || (job_queue->waitingPop > 0)){
+      pthread_cond_signal(&job_queue->signalPop);
       pthread_cond_wait(&job_queue->signalDestroy, &job_queue->lock);
     }
     pthread_mutex_unlock(&job_queue->lock);

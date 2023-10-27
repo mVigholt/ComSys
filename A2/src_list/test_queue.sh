@@ -8,9 +8,9 @@ make fibs
 echo "Running the tests.."
 exitcode=0
 
-# Testing list job queue
+# Testing job queue
 echo "Testing 'job_queue.c with fibs.c"
-for f in test_files/fibs/*.input
+for f in ../test_files/fibs/*.input
 do
   echo "--------------------"
   echo "testing on file input: ${f}"
