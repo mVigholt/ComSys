@@ -9,6 +9,7 @@ struct job_queue {
   int front; //first element in queue
   int kill; //1 if destroy has been called otherwise 0
   int waitingPop; //number of waiting pop requests
+  int waitingPush; //number of waiting push requests
   void** queue; //pointer to the queue (array of void*)
   pthread_mutex_t lock;
   pthread_cond_t signalDestroy;
