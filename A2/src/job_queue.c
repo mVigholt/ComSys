@@ -84,9 +84,9 @@ int job_queue_pop(struct job_queue* job_queue, void** data) {
     if (job_queue->size < job_queue->capacity) {
       pthread_cond_signal(&job_queue->signalPush);
     }
-    if (job_queue->size > 0) {
-      pthread_cond_signal(&job_queue->signalPop);
-    }
+    // if (job_queue->size > 0) {
+    //   pthread_cond_signal(&job_queue->signalPop);
+    // }
     pthread_mutex_unlock(&job_queue->lock);
     return EXIT_SUCCESS;
   }  

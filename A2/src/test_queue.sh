@@ -18,8 +18,7 @@ do
   do
     echo "Computing Fibonacci numbers with $i thread(s).."
     echo "time ./fibs -n ${i} < ${f} > /dev/null"
-    time ./fibs -n ${i} < ${f} 
-    #> /dev/null
+    time ./fibs -n ${i} < ${f} > /dev/null
     echo ""
   done
 done
