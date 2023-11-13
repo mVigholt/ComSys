@@ -24,3 +24,14 @@ typedef struct Request {
     RequestHeader_t header;
     char payload[PATH_LEN];
 } Request_t;
+
+// container for assembling request messages
+typedef struct BlockInfo {
+    uint32_t paySize;
+    uint32_t errorCode;
+    uint32_t blockNumber;
+    uint32_t blockCount;
+    hashdata_t blockHash;
+    hashdata_t totalHash;
+    char* payload;
+} BlockInfo_t;

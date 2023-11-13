@@ -6,6 +6,7 @@ import socketserver
 import yaml
 import struct
 import math
+import random
 
 # This is quick hack to get relative imports of a higher file working 
 if __package__ is None:
@@ -240,33 +241,42 @@ class RequestHandler(socketserver.StreamRequestHandler):
         sendable_length = MSG_MAX-LEN_RESPONSE_LENGTH-LEN_STATUS-LEN_BLOCK_ID \
             -LEN_BLOCKS_COUNT-LEN_BLOCK_HASH-LEN_TOTAL_HASH
 
-        blocks = math.ceil(len(to_send) / sendable_length)
+        blocks_count = math.ceil(len(to_send) / sendable_length)
         this_block = 0
+        blocks = []
 
-        # loop to send one or more blocks of payload
+        # loop to determine all the blocks in the payload
         while len(to_send) > 0:
 
             this_payload = to_send[:sendable_length]
-
-            # Assemble an individual payload block
-            payload = bytearray()
-            payload.extend(struct.pack('!I', len(this_payload)))
-            payload.extend(struct.pack('!I', status))
-            payload.extend(struct.pack('!I', this_block))
-            payload.extend(struct.pack('!I', blocks))
-            payload.extend(get_sha256(this_payload))
-            payload.extend(total_checksum)    
-            payload.extend(this_payload)
-
-            print(f"Sending reply {this_block}/{blocks} with payload length "
-                f"of {len(this_payload)} bytes")
-
-            # Send the block
-            self.request.sendall(payload)
+            blocks.append((this_block, this_payload))
 
             # Determine if more blocks to send
             to_send = to_send[sendable_length:]
             this_block = this_block + 1
+
+        # Shuffle the blocks to reply in a random order
+        random.shuffle(blocks)
+
+        # loop to send one or more blocks of payload
+        for block_num, block_payload in blocks:
+
+            # Assemble an individual payload block
+            payload = bytearray()
+            payload.extend(struct.pack('!I', len(block_payload)))
+            payload.extend(struct.pack('!I', status))
+            payload.extend(struct.pack('!I', block_num))
+            payload.extend(struct.pack('!I', blocks_count))
+            payload.extend(get_sha256(block_payload))
+            payload.extend(total_checksum)    
+            payload.extend(block_payload)
+
+            print(f"Sending reply {block_num+1}/{blocks_count} with payload "
+                f"length of {len(block_payload)} bytes")
+
+            # Send the block
+            self.request.sendall(payload)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
