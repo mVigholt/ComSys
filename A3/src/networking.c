@@ -210,18 +210,25 @@ int read_all_blocks(BlockInfo_t* blockInfo, int fd) {
             blocksRead++;
             if (read_block(&partialInfo, fd) != EXIT_SUCCESS) {
                 retVal = EXIT_FAILURE;
-                //Just keep reading the remaining blocks, 
-                //as its too big a hasle to figure out what to free if we break here
+                blockInfo = &partialInfo;
+                break;
             }
             fullPayload[partialInfo.blockNumber] = partialInfo.payload;
             blockInfo->paySize += partialInfo.paySize;
         }
         
-        blockInfo->payload = malloc(blockInfo->paySize + 1);
-        memset(blockInfo->payload, 0, blockInfo->paySize + 1);
+        if (retVal == EXIT_SUCCESS) {
+            blockInfo->payload = malloc(blockInfo->paySize + 1);
+            memset(blockInfo->payload, 0, blockInfo->paySize + 1);
+        }
+
         for (uint32_t i = 0; i < blocksRead; i++) {
-            strcat(blockInfo->payload, (char*)fullPayload[i]);
-            free((char*)fullPayload[i]);
+            if ((char*)fullPayload[i] != NULL) {
+                if (retVal == EXIT_SUCCESS) {
+                    strcat(blockInfo->payload, (char*)fullPayload[i]);
+                }
+                free((char*)fullPayload[i]);
+            }
         }
         free((char**)fullPayload);
     }
@@ -393,7 +400,9 @@ int main(int argc, char **argv) {
                 free(blockInfo.payload);
                 close(fd);
                 
-                state = 1;
+                if (blockInfo.errorCode <= 2) {
+                    state = 1;
+                }
                 break;
             
             case 1:
